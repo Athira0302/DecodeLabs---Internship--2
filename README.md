@@ -1,47 +1,44 @@
-Exploratory Data Analysis
-Overview
-This project focuses on the discovery phase and diagnostic framework of a raw dataset. The dataset was systematically interrogated using statistical logic to identify distributions, patterns, and anomalies before moving to predictive modeling.
-Objectives
-Calculate basic descriptive statistics (mean, median, count).
-Analyze univariate data distributions and shapes.
-Isolate data anomalies and outliers
-Map feature relationships and directions.
-Tools Used
-Python (Pandas, NumPy, Matplotlib, Seaborn)
-Excel
-Steps Performed
-Loaded the raw CSV/Excel evidence into the analytical pipeline.  
-Data analytics P2.pdf
+# 📊 Exploratory Data Analysis (EDA) Project
 
-Addressed data completeness by handling missing values and invalid formats.  
-Data analytics P2.pdf
+## Overview
 
-Generated a foundational Five-Number Summary to evaluate the dataset's center of gravity.  
-Data analytics P2.pdf
+This project was developed as part of the **DecodeLabs Data Analytics Internship Program (Project 2)**.
 
-Applied IQR and Z-Score mathematical frameworks to flag and remove noise from true signals.  
-Data analytics P2.pdf
+The goal of this project is to perform **Exploratory Data Analysis (EDA)** on a transactional dataset to understand data patterns, identify trends, detect outliers, and generate meaningful business insights using Python.
 
-Calculated Pearson Correlation Coefficients (r) to identify hidden business clues.  
-Data analytics P2.pdf
+---
 
-Results
-Core dataset distributions (symmetrical vs. skewed) were successfully mapped.  
+## 🎯 Project Objectives
 
-Formats and missing points were verified for an overall data completeness check.  
+- Load and inspect the dataset
+- Perform data cleaning and validation
+- Analyze missing values and duplicates
+- Calculate descriptive statistics
+- Detect outliers using the IQR method
+- Analyze trends and distributions
+- Generate visualizations
+- Summarize key business insights
 
-Outliers were detected and isolated using rigorous statistical thresholds.  
+---
 
-Actionable insights were documented to pass the analytical "So What?" test.  
+## 🛠️ Technologies Used
 
-Files
-eda_framework.py – Python script used for statistical calculations
+- Python
+- Pandas
+- NumPy
+- Matplotlib
+- Seaborn
+- OpenPyXL
+- Jupyter Notebook / VS Code
 
-eda_presentation.pptx – Slide deck summarizing executive insights  
+---
 
-Author
-Athira Raj
+## 📂 Project Structure
 
-Acknowledgement
-Completed as part of the DecodeLabs Data Analytics Internship Program (Batch 2026).  
-
+```text
+EDA_Project/
+│
+├── task_2.py
+├── Dataset for Data Analytics (1).xlsx
+├── requirements.txt
+└── README.md
