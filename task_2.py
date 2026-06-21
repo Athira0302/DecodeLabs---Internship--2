@@ -3,94 +3,95 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# =====================================================
-# STAGE 1 : LOAD DATASET
-# =====================================================
+# ==========================================================
+# DATA LOADING
+# ==========================================================
 
 file_name = "Dataset for Data Analytics (1).xlsx"
 
 try:
     df = pd.read_excel(file_name, engine="openpyxl")
 
-    print("="*50)
+    print("=" * 60)
     print("DATASET LOADED SUCCESSFULLY")
-    print("="*50)
-
-    print(f"\nRows : {df.shape[0]}")
-    print(f"Columns : {df.shape[1]}")
+    print("=" * 60)
 
 except Exception as e:
-    print("Error Loading File:", e)
+    print("Error:", e)
     exit()
 
-# =====================================================
-# STAGE 2 : DATA OVERVIEW
-# =====================================================
+# ==========================================================
+# DATASET OVERVIEW
+# ==========================================================
 
-print("\n\nDATASET OVERVIEW")
-print("="*50)
+print("\nDATASET SHAPE")
+print(df.shape)
 
+print("\nCOLUMN NAMES")
+print(df.columns.tolist())
+
+print("\nFIRST 5 RECORDS")
 print(df.head())
 
-print("\nColumn Information:")
-print(df.info())
+print("\nDATA TYPES")
+print(df.dtypes)
 
-# =====================================================
-# STAGE 3 : MISSING VALUES
-# =====================================================
+# ==========================================================
+# DATA CLEANING
+# ==========================================================
 
-print("\n\nMISSING VALUE ANALYSIS")
-print("="*50)
+print("\n" + "=" * 60)
+print("DATA CLEANING")
+print("=" * 60)
 
-missing = df.isnull().sum()
+# Missing values
+print("\nMISSING VALUES")
+print(df.isnull().sum())
 
-print(missing)
+# Handle CouponCode missing values
+if "CouponCode" in df.columns:
+    df["CouponCode"] = df["CouponCode"].fillna("No Coupon")
 
-total_missing = missing.sum()
-
-print(f"\nTotal Missing Values: {total_missing}")
-
-# =====================================================
-# STAGE 4 : DUPLICATE CHECK
-# =====================================================
-
+# Duplicate records
 duplicates = df.duplicated().sum()
+print(f"\nDuplicate Records: {duplicates}")
 
-print("\nDuplicate Records:", duplicates)
-
-# =====================================================
-# STAGE 5 : DATE CONVERSION
-# =====================================================
-
+# Date conversion
 df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
 
-invalid_dates = df["Date"].isnull().sum()
+invalid_dates = df["Date"].isna().sum()
+print(f"Invalid Dates: {invalid_dates}")
 
-print("\nInvalid Dates:", invalid_dates)
+# ==========================================================
+# DESCRIPTIVE STATISTICS
+# ==========================================================
 
-# =====================================================
-# STAGE 6 : DESCRIPTIVE STATISTICS
-# =====================================================
+print("\n" + "=" * 60)
+print("DESCRIPTIVE STATISTICS")
+print("=" * 60)
 
-print("\n\nDESCRIPTIVE STATISTICS")
-print("="*50)
-
-numeric_cols = ["Quantity", "UnitPrice", "TotalPrice"]
+numeric_cols = [
+    "Quantity",
+    "UnitPrice",
+    "ItemsInCart",
+    "TotalPrice"
+]
 
 print(df[numeric_cols].describe())
 
-print("\nMean Values")
+print("\nMEAN")
 print(df[numeric_cols].mean())
 
-print("\nMedian Values")
+print("\nMEDIAN")
 print(df[numeric_cols].median())
 
-# =====================================================
-# STAGE 7 : OUTLIER DETECTION
-# =====================================================
+# ==========================================================
+# OUTLIER DETECTION
+# ==========================================================
 
-print("\n\nOUTLIER DETECTION")
-print("="*50)
+print("\n" + "=" * 60)
+print("OUTLIER DETECTION")
+print("=" * 60)
 
 for col in numeric_cols:
 
@@ -99,68 +100,107 @@ for col in numeric_cols:
 
     IQR = Q3 - Q1
 
-    lower = Q1 - 1.5 * IQR
-    upper = Q3 + 1.5 * IQR
+    lower = Q1 - (1.5 * IQR)
+    upper = Q3 + (1.5 * IQR)
 
-    outliers = df[(df[col] < lower) | (df[col] > upper)]
+    outliers = df[
+        (df[col] < lower) |
+        (df[col] > upper)
+    ]
 
-    print(f"{col}: {len(outliers)} Outliers Found")
+    print(f"{col}: {len(outliers)} outliers")
 
-# =====================================================
-# STAGE 8 : ORDER STATUS ANALYSIS
-# =====================================================
+# ==========================================================
+# ORDER STATUS ANALYSIS
+# ==========================================================
 
-print("\n\nORDER STATUS DISTRIBUTION")
-print("="*50)
+print("\n" + "=" * 60)
+print("ORDER STATUS ANALYSIS")
+print("=" * 60)
 
 print(df["OrderStatus"].value_counts())
 
-# =====================================================
-# STAGE 9 : TREND ANALYSIS
-# =====================================================
+# ==========================================================
+# PRODUCT ANALYSIS
+# ==========================================================
 
-print("\n\nMONTHLY SALES TREND")
-print("="*50)
+print("\n" + "=" * 60)
+print("TOP PRODUCTS")
+print("=" * 60)
+
+print(df["Product"].value_counts().head(10))
+
+# ==========================================================
+# PAYMENT METHOD ANALYSIS
+# ==========================================================
+
+print("\n" + "=" * 60)
+print("PAYMENT METHODS")
+print("=" * 60)
+
+print(df["PaymentMethod"].value_counts())
+
+# ==========================================================
+# REFERRAL SOURCE ANALYSIS
+# ==========================================================
+
+print("\n" + "=" * 60)
+print("REFERRAL SOURCES")
+print("=" * 60)
+
+print(df["ReferralSource"].value_counts())
+
+# ==========================================================
+# SALES TREND ANALYSIS
+# ==========================================================
+
+print("\n" + "=" * 60)
+print("MONTHLY SALES TREND")
+print("=" * 60)
 
 monthly_sales = (
-    df.groupby(df["Date"].dt.month)["TotalPrice"]
+    df.groupby(df["Date"].dt.to_period("M"))
+    ["TotalPrice"]
     .sum()
 )
 
 print(monthly_sales)
 
-# =====================================================
-# STAGE 10 : CORRELATION ANALYSIS
-# =====================================================
+# ==========================================================
+# CORRELATION ANALYSIS
+# ==========================================================
 
-print("\n\nCORRELATION MATRIX")
-print("="*50)
+print("\n" + "=" * 60)
+print("CORRELATION MATRIX")
+print("=" * 60)
 
 correlation = df[numeric_cols].corr()
 
 print(correlation)
 
-# =====================================================
-# STAGE 11 : BUSINESS METRICS
-# =====================================================
+# ==========================================================
+# BUSINESS METRICS
+# ==========================================================
 
-print("\n\nBUSINESS SUMMARY")
-print("="*50)
+print("\n" + "=" * 60)
+print("BUSINESS SUMMARY")
+print("=" * 60)
 
-print(f"Total Revenue : ${df['TotalPrice'].sum():,.2f}")
+total_revenue = df["TotalPrice"].sum()
+avg_transaction = df["TotalPrice"].mean()
+highest_transaction = df["TotalPrice"].max()
+lowest_transaction = df["TotalPrice"].min()
 
-print(f"Highest Transaction : ${df['TotalPrice'].max():,.2f}")
+print(f"Total Revenue: ${total_revenue:,.2f}")
+print(f"Average Transaction: ${avg_transaction:,.2f}")
+print(f"Highest Transaction: ${highest_transaction:,.2f}")
+print(f"Lowest Transaction: ${lowest_transaction:,.2f}")
 
-print(f"Lowest Transaction : ${df['TotalPrice'].min():,.2f}")
+# ==========================================================
+# VISUALIZATIONS
+# ==========================================================
 
-print(f"Average Transaction : ${df['TotalPrice'].mean():,.2f}")
-
-# =====================================================
-# STAGE 12 : VISUALIZATION
-# =====================================================
-
-# Histogram
-
+# Total Price Distribution
 plt.figure(figsize=(8,5))
 plt.hist(df["TotalPrice"], bins=20)
 plt.title("Distribution of Total Price")
@@ -169,26 +209,43 @@ plt.ylabel("Frequency")
 plt.show()
 
 # Boxplot
-
 plt.figure(figsize=(8,5))
 sns.boxplot(x=df["TotalPrice"])
 plt.title("Outlier Detection - Total Price")
 plt.show()
 
-# Order Status Count
-
+# Order Status
 plt.figure(figsize=(8,5))
-sns.countplot(x="OrderStatus", data=df)
+sns.countplot(data=df, x="OrderStatus")
 plt.title("Order Status Distribution")
 plt.xticks(rotation=45)
 plt.show()
 
-# Monthly Sales Trend
+# Top Products
+plt.figure(figsize=(10,5))
+df["Product"].value_counts().head(10).plot(kind="bar")
+plt.title("Top 10 Products")
+plt.ylabel("Number of Orders")
+plt.show()
 
+# Payment Methods
+plt.figure(figsize=(8,5))
+df["PaymentMethod"].value_counts().plot(kind="bar")
+plt.title("Payment Methods")
+plt.ylabel("Count")
+plt.show()
+
+# Referral Sources
+plt.figure(figsize=(8,5))
+df["ReferralSource"].value_counts().plot(kind="bar")
+plt.title("Referral Sources")
+plt.ylabel("Count")
+plt.show()
+
+# Monthly Revenue Trend
 monthly_sales.plot(
-    kind="line",
-    marker="o",
-    figsize=(8,5)
+    figsize=(10,5),
+    marker="o"
 )
 
 plt.title("Monthly Revenue Trend")
@@ -198,7 +255,6 @@ plt.grid(True)
 plt.show()
 
 # Correlation Heatmap
-
 plt.figure(figsize=(6,5))
 
 sns.heatmap(
@@ -208,30 +264,37 @@ sns.heatmap(
 )
 
 plt.title("Correlation Heatmap")
-
 plt.show()
 
-# =====================================================
-# STAGE 13 : KEY INSIGHTS
-# =====================================================
+# ==========================================================
+# FINAL INSIGHTS
+# ==========================================================
 
-print("\n\nKEY INSIGHTS")
-print("="*50)
+print("\n" + "=" * 60)
+print("KEY INSIGHTS")
+print("=" * 60)
 
-print(f"1. Total Revenue Generated = ${df['TotalPrice'].sum():,.2f}")
-
-print(f"2. Highest Transaction = ${df['TotalPrice'].max():,.2f}")
-
-print(f"3. Average Transaction = ${df['TotalPrice'].mean():,.2f}")
+print(f"Total Revenue Generated: ${total_revenue:,.2f}")
+print(f"Average Transaction Value: ${avg_transaction:,.2f}")
 
 print(
-    f"4. Most Common Order Status = "
+    f"Most Common Order Status: "
     f"{df['OrderStatus'].mode()[0]}"
 )
 
 print(
-    f"5. Dataset contains "
-    f"{len(df)} transaction records."
+    f"Most Sold Product: "
+    f"{df['Product'].mode()[0]}"
+)
+
+print(
+    f"Most Used Payment Method: "
+    f"{df['PaymentMethod'].mode()[0]}"
+)
+
+print(
+    f"Top Referral Source: "
+    f"{df['ReferralSource'].mode()[0]}"
 )
 
 print("\nEDA COMPLETED SUCCESSFULLY")
