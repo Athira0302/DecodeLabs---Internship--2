@@ -1,75 +1,237 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-# =========================================================================
-# STAGE 1: INPUT - Loading the Excel Spreadsheet (.xlsx)
-# =========================================================================
-# Updated with your exact file name
+# =====================================================
+# STAGE 1 : LOAD DATASET
+# =====================================================
+
 file_name = "Dataset for Data Analytics (1).xlsx"
 
 try:
-    df = pd.read_excel(file_name, engine='openpyxl')
-    print("--- [STAGE 1: INPUT] ---")
-    print(f"✅ Success: Loaded '{file_name}' using openpyxl engine.")
-    print(f"📁 Dimensions: {df.shape[0]} transaction lines, {df.shape[1]} columns\n")
-except FileNotFoundError:
-    print(f"❌ Error: Could not find '{file_name}' in this folder.")
-    print("Please check that the file is placed in the exact same folder open in VS Code.")
+    df = pd.read_excel(file_name, engine="openpyxl")
+
+    print("="*50)
+    print("DATASET LOADED SUCCESSFULLY")
+    print("="*50)
+
+    print(f"\nRows : {df.shape[0]}")
+    print(f"Columns : {df.shape[1]}")
+
+except Exception as e:
+    print("Error Loading File:", e)
     exit()
-except ImportError:
-    print("❌ Error: Missing the 'openpyxl' engine dependency.")
-    print("Please run this command first in a cell or terminal to fix it: pip install openpyxl")
-    exit()
 
-# =========================================================================
-# STAGE 2: PROCESS - Executing Mathematical & Statistical Diagnostics
-# =========================================================================
-print("--- [STAGE 2: PROCESS] ---")
+# =====================================================
+# STAGE 2 : DATA OVERVIEW
+# =====================================================
 
-# 1. Missing Value Check (Data Completeness)
-missing_counts = df.isnull().sum()
-total_cells = df.size
-total_missing = missing_counts.sum()
-completeness_rate = ((total_cells - total_missing) / total_cells) * 100
-print(f"🔹 Data Completeness Rate: {completeness_rate:.2f}%")
-if total_missing > 0:
-    print("Missing data summary per column:")
-    print(missing_counts[missing_counts > 0], "\n")
-else:
-    print("🔬 Diagnostics: Perfect dataset integrity. No missing cells found.\n")
+print("\n\nDATASET OVERVIEW")
+print("="*50)
 
-# 2. Date Column Format Audit
-df['Cleaned_Date'] = pd.to_datetime(df['Date'], errors='coerce')
-date_anomalies = df['Cleaned_Date'].isna().sum()
-print(f"🔹 Temporal Structure Anomalies: {date_anomalies} invalid dates found.\n")
+print(df.head())
 
-# 3. The Logic Skeleton: Five-Number Summary
-print("🔹 Logic Skeleton (Five-Number Summary Blueprint):")
-target_metrics = ['Quantity', 'UnitPrice', 'TotalPrice']
-summary_table = df[target_metrics].describe().loc[['count', 'mean', '50%', 'min', '25%', '75%', 'max']]
-summary_table = summary_table.rename(index={'50%': 'median (50%)'})
-print(summary_table, "\n")
+print("\nColumn Information:")
+print(df.info())
 
-# 4. Distribution Geometry (Mean vs Median Check)
-print("🔹 Distribution Geometry Diagnosis:")
-for col in ['UnitPrice', 'TotalPrice']:
-    mean_val = df[col].mean()
-    median_val = df[col].median()
-    print(f" [{col}] Mean (Average): {mean_val:.2f} | Median: {median_val:.2f}")
-    
-    if abs(mean_val - median_val) > (median_val * 0.1):
-        print(f"   ⚠️ Direction: Distribution is SKEWED. Use Median to represent the center.")
-    else:
-        print(f"   ⚖️ Direction: Distribution is SYMMETRICAL. Mean can be safely reported.")
-print("\n")
+# =====================================================
+# STAGE 3 : MISSING VALUES
+# =====================================================
 
-# =========================================================================
-# STAGE 3: OUTPUT - Summary Deliverables
-# =========================================================================
-print("--- [STAGE 3: OUTPUT] ---")
-print(f"🔹 Operational Revenue Peak (Max Line Item) : ${df['TotalPrice'].max():,.2f}")
-print(f"🔹 Minimum Single Line Item Spend           : ${df['TotalPrice'].min():,.2f}")
-print(f"🔹 Total Combined Revenue Tracked           : ${df['TotalPrice'].sum():,.2f}")
+print("\n\nMISSING VALUE ANALYSIS")
+print("="*50)
 
-print("\n🔹 Transactional Distribution by OrderStatus:")
-print(df['OrderStatus'].value_counts())
+missing = df.isnull().sum()
+
+print(missing)
+
+total_missing = missing.sum()
+
+print(f"\nTotal Missing Values: {total_missing}")
+
+# =====================================================
+# STAGE 4 : DUPLICATE CHECK
+# =====================================================
+
+duplicates = df.duplicated().sum()
+
+print("\nDuplicate Records:", duplicates)
+
+# =====================================================
+# STAGE 5 : DATE CONVERSION
+# =====================================================
+
+df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+
+invalid_dates = df["Date"].isnull().sum()
+
+print("\nInvalid Dates:", invalid_dates)
+
+# =====================================================
+# STAGE 6 : DESCRIPTIVE STATISTICS
+# =====================================================
+
+print("\n\nDESCRIPTIVE STATISTICS")
+print("="*50)
+
+numeric_cols = ["Quantity", "UnitPrice", "TotalPrice"]
+
+print(df[numeric_cols].describe())
+
+print("\nMean Values")
+print(df[numeric_cols].mean())
+
+print("\nMedian Values")
+print(df[numeric_cols].median())
+
+# =====================================================
+# STAGE 7 : OUTLIER DETECTION
+# =====================================================
+
+print("\n\nOUTLIER DETECTION")
+print("="*50)
+
+for col in numeric_cols:
+
+    Q1 = df[col].quantile(0.25)
+    Q3 = df[col].quantile(0.75)
+
+    IQR = Q3 - Q1
+
+    lower = Q1 - 1.5 * IQR
+    upper = Q3 + 1.5 * IQR
+
+    outliers = df[(df[col] < lower) | (df[col] > upper)]
+
+    print(f"{col}: {len(outliers)} Outliers Found")
+
+# =====================================================
+# STAGE 8 : ORDER STATUS ANALYSIS
+# =====================================================
+
+print("\n\nORDER STATUS DISTRIBUTION")
+print("="*50)
+
+print(df["OrderStatus"].value_counts())
+
+# =====================================================
+# STAGE 9 : TREND ANALYSIS
+# =====================================================
+
+print("\n\nMONTHLY SALES TREND")
+print("="*50)
+
+monthly_sales = (
+    df.groupby(df["Date"].dt.month)["TotalPrice"]
+    .sum()
+)
+
+print(monthly_sales)
+
+# =====================================================
+# STAGE 10 : CORRELATION ANALYSIS
+# =====================================================
+
+print("\n\nCORRELATION MATRIX")
+print("="*50)
+
+correlation = df[numeric_cols].corr()
+
+print(correlation)
+
+# =====================================================
+# STAGE 11 : BUSINESS METRICS
+# =====================================================
+
+print("\n\nBUSINESS SUMMARY")
+print("="*50)
+
+print(f"Total Revenue : ${df['TotalPrice'].sum():,.2f}")
+
+print(f"Highest Transaction : ${df['TotalPrice'].max():,.2f}")
+
+print(f"Lowest Transaction : ${df['TotalPrice'].min():,.2f}")
+
+print(f"Average Transaction : ${df['TotalPrice'].mean():,.2f}")
+
+# =====================================================
+# STAGE 12 : VISUALIZATION
+# =====================================================
+
+# Histogram
+
+plt.figure(figsize=(8,5))
+plt.hist(df["TotalPrice"], bins=20)
+plt.title("Distribution of Total Price")
+plt.xlabel("Total Price")
+plt.ylabel("Frequency")
+plt.show()
+
+# Boxplot
+
+plt.figure(figsize=(8,5))
+sns.boxplot(x=df["TotalPrice"])
+plt.title("Outlier Detection - Total Price")
+plt.show()
+
+# Order Status Count
+
+plt.figure(figsize=(8,5))
+sns.countplot(x="OrderStatus", data=df)
+plt.title("Order Status Distribution")
+plt.xticks(rotation=45)
+plt.show()
+
+# Monthly Sales Trend
+
+monthly_sales.plot(
+    kind="line",
+    marker="o",
+    figsize=(8,5)
+)
+
+plt.title("Monthly Revenue Trend")
+plt.xlabel("Month")
+plt.ylabel("Revenue")
+plt.grid(True)
+plt.show()
+
+# Correlation Heatmap
+
+plt.figure(figsize=(6,5))
+
+sns.heatmap(
+    correlation,
+    annot=True,
+    cmap="Blues"
+)
+
+plt.title("Correlation Heatmap")
+
+plt.show()
+
+# =====================================================
+# STAGE 13 : KEY INSIGHTS
+# =====================================================
+
+print("\n\nKEY INSIGHTS")
+print("="*50)
+
+print(f"1. Total Revenue Generated = ${df['TotalPrice'].sum():,.2f}")
+
+print(f"2. Highest Transaction = ${df['TotalPrice'].max():,.2f}")
+
+print(f"3. Average Transaction = ${df['TotalPrice'].mean():,.2f}")
+
+print(
+    f"4. Most Common Order Status = "
+    f"{df['OrderStatus'].mode()[0]}"
+)
+
+print(
+    f"5. Dataset contains "
+    f"{len(df)} transaction records."
+)
+
+print("\nEDA COMPLETED SUCCESSFULLY")
