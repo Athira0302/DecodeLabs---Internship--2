@@ -40,5 +40,4 @@ EDA_Project/
 │
 ├── task_2.py
 ├── Dataset for Data Analytics (1).xlsx
-├── requirements.txt
 └── README.md
